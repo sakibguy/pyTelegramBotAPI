@@ -627,7 +627,6 @@ Get help. Discuss. Chat.
 * [Send to Kindle Bot](https://telegram.me/Send2KindleBot) by *GabrielRF* - Send to Kindle files or links to files.
 * [Telegram LMGTFY_bot](https://github.com/GabrielRF/telegram-lmgtfy_bot) ([source](https://github.com/GabrielRF/telegram-lmgtfy_bot)) by *GabrielRF* - Let me Google that for you.
 * [Telegram UrlProBot](https://github.com/GabrielRF/telegram-urlprobot) ([source](https://github.com/GabrielRF/telegram-urlprobot)) by *GabrielRF* - URL shortener and URL expander.
-* [Telegram Proxy Bot](https://bitbucket.org/master_groosha/telegram-proxy-bot) by *Groosha* - A simple BITM (bot-in-the-middle) for Telegram acting as some kind of "proxy".
 * [Telegram Proxy Bot](https://github.com/mrgigabyte/proxybot) by *mrgigabyte* - `Credits for the original version of this bot goes to` **Groosha** `, simply added certain features which I thought were needed`.
 * [RadRetroRobot](https://github.com/Tronikart/RadRetroRobot) by *Tronikart* - Multifunctional Telegram Bot RadRetroRobot.
 * [League of Legends bot](https://telegram.me/League_of_Legends_bot) ([source](https://github.com/i32ropie/lol)) by *i32ropie*
@@ -683,5 +682,6 @@ Get help. Discuss. Chat.
 * [COVID-19 Galicia Bot](https://t.me/covid19_galicia_bot) by [@dgarcoe](https://github.com/dgarcoe) This bot provides daily data related to the COVID19 crisis in Galicia (Spain) obtained from official government sources.
 * [MineGramBot](https://github.com/ModischFabrications/MineGramBot) by [ModischFabrications](https://github.com/ModischFabrications). This bot can start, stop and monitor a minecraft server.
 * [Tabletop DiceBot](https://github.com/dexpiper/tabletopdicebot) by [dexpiper](https://github.com/dexpiper). This bot can roll multiple dices for RPG-like games, add positive and negative modifiers and show short descriptions to the rolls.
-* [BarnameKon](https://t.me/BarnameKonBot) by [Anvaari](https://github.com/anvaari). This Bot make "Add to google calnedar" link for your events. It give information about event and return link. It work for Jalali calendar and in Tehran Time. [Source code](https://github.com/anvaari/BarnameKon)
+* [BarnameKon](https://t.me/BarnameKonBot) by [Anvaari](https://github.com/anvaari). This Bot make "Add to google calendar" link for your events. It give information about event and return link. It work for Jalali calendar and in Tehran Time. [Source code](https://github.com/anvaari/BarnameKon)
+* [Price Tracker](https://t.me/trackokbot) by [@barbax7](https://github.com/barbax7). This bot tracks amazon.it product's prices the user is interested to and notify him when one price go down.
 Want to have your bot listed here? Just make a pull requet.
