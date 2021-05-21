@@ -455,7 +455,7 @@ Refer [Bot Api](https://core.telegram.org/bots/api#messageentity) for extra deta
 ## Advanced use of the API
 
 ### Asynchronous delivery of messages
-There exists an implementation of TeleBot which executes all `send_xyz` and the `get_me` functions asynchronously. This can speed up you bot __significantly__, but it has unwanted side effects if used without caution.
+There exists an implementation of TeleBot which executes all `send_xyz` and the `get_me` functions asynchronously. This can speed up your bot __significantly__, but it has unwanted side effects if used without caution.
 To enable this behaviour, create an instance of AsyncTeleBot instead of TeleBot.
 ```python
 tb = telebot.AsyncTeleBot("TOKEN")
@@ -684,4 +684,6 @@ Get help. Discuss. Chat.
 * [Tabletop DiceBot](https://github.com/dexpiper/tabletopdicebot) by [dexpiper](https://github.com/dexpiper). This bot can roll multiple dices for RPG-like games, add positive and negative modifiers and show short descriptions to the rolls.
 * [BarnameKon](https://t.me/BarnameKonBot) by [Anvaari](https://github.com/anvaari). This Bot make "Add to google calendar" link for your events. It give information about event and return link. It work for Jalali calendar and in Tehran Time. [Source code](https://github.com/anvaari/BarnameKon)
 * [Price Tracker](https://t.me/trackokbot) by [@barbax7](https://github.com/barbax7). This bot tracks amazon.it product's prices the user is interested to and notify him when one price go down.
-Want to have your bot listed here? Just make a pull requet.
+* [Torrent Hunt](https://t.me/torrenthuntbot) by [@Hemantapkh](https://github.com/hemantapkh/torrenthunt). Torrent Hunt bot is a multilingual bot with inline mode support to search and explore torrents from 1337x.to.
+
+**Want to have your bot listed here? Just make a pull request.**

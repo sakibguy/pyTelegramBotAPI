@@ -843,6 +843,50 @@ def set_chat_permissions(token, chat_id, permissions):
     return _make_request(token, method_url, params=payload, method='post')
 
 
+def create_chat_invite_link(token, chat_id, expire_date, member_limit):
+    method_url = 'createChatInviteLink'
+    payload = {
+        'chat_id': chat_id
+    }
+
+    if expire_date is not None:
+        payload['expire_date'] = expire_date
+        if isinstance(payload['expire_date'], datetime):
+            payload['expire_date'] = payload['expire_date'].timestamp()
+
+    if member_limit is not None:
+        payload['member_limit'] = member_limit
+
+    return _make_request(token, method_url, params=payload, method='post')
+
+
+def edit_chat_invite_link(token, chat_id, invite_link, expire_date, member_limit):
+    method_url = 'editChatInviteLink'
+    payload = {
+        'chat_id': chat_id,
+        'invite_link': invite_link
+    }
+
+    if expire_date is not None:
+        payload['expire_date'] = expire_date
+        if isinstance(payload['expire_date'], datetime):
+            payload['expire_date'] = payload['expire_date'].timestamp()
+
+    if member_limit is not None:
+        payload['member_limit'] = member_limit
+
+    return _make_request(token, method_url, params=payload, method='post')
+
+
+def revoke_chat_invite_link(token, chat_id, invite_link):
+    method_url = 'revokeChatInviteLink'
+    payload = {
+        'chat_id': chat_id,
+        'invite_link': invite_link
+    }
+    return _make_request(token, method_url, params=payload, method='post')
+
+
 def export_chat_invite_link(token, chat_id):
     method_url = 'exportChatInviteLink'
     payload = {'chat_id': chat_id}
@@ -1277,7 +1321,7 @@ def send_poll(
     payload = {
         'chat_id': str(chat_id),
         'question': question,
-        'options': json.dumps(options)}
+        'options': json.dumps(_convert_poll_options(options))}
 
     if is_anonymous is not None:
         payload['is_anonymous'] = is_anonymous
@@ -1345,6 +1389,20 @@ def _convert_entites(entites):
         return [entity.to_json() for entity in entites]
     else:
         return entites
+
+
+def _convert_poll_options(poll_options):
+    if poll_options is None:
+        return None
+    elif len(poll_options) == 0:
+        return []
+    elif isinstance(poll_options[0], str):
+        # Compatibility mode with previous bug when only list of string was accepted as poll_options
+        return poll_options
+    elif isinstance(poll_options[0], types.PollOption):
+        return [option.text for option in poll_options]
+    else:
+        return poll_options
 
 
 def convert_input_media(media):
