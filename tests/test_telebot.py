@@ -6,6 +6,7 @@ sys.path.append('../')
 import time
 import pytest
 import os
+from datetime import datetime, timedelta
 
 import telebot
 from telebot import types
@@ -407,6 +408,23 @@ class TestTeleBot:
         cn = tb.get_chat_members_count(GROUP_ID)
         assert cn > 1
 
+    def test_export_chat_invite_link(self):
+        tb = telebot.TeleBot(TOKEN)
+        il = tb.export_chat_invite_link(GROUP_ID)
+        assert isinstance(il, str)
+
+    def test_create_revoke_detailed_chat_invite_link(self):
+        tb = telebot.TeleBot(TOKEN)
+        cil = tb.create_chat_invite_link(GROUP_ID, 
+            (datetime.now() + timedelta(minutes=1)).timestamp(), member_limit=5)
+        assert isinstance(cil.invite_link, str)
+        assert cil.creator.id == tb.get_me().id
+        assert isinstance(cil.expire_date, (float, int))
+        assert cil.member_limit == 5
+        assert not cil.is_revoked
+        rcil = tb.revoke_chat_invite_link(GROUP_ID, cil.invite_link)
+        assert rcil.is_revoked
+
     def test_edit_markup(self):
         text = 'CI Test Message'
         tb = telebot.TeleBot(TOKEN)
@@ -440,8 +458,11 @@ class TestTeleBot:
         pre_checkout_query = None
         poll = None
         poll_answer = None
+        my_chat_member = None
+        chat_member = None
         return types.Update(-1001234038283, message, edited_message, channel_post, edited_channel_post, inline_query,
-                            chosen_inline_result, callback_query, shipping_query, pre_checkout_query, poll, poll_answer)
+                            chosen_inline_result, callback_query, shipping_query, pre_checkout_query, poll, poll_answer,
+                            my_chat_member, chat_member)
 
     def test_is_string_unicode(self):
         s1 = u'string'
