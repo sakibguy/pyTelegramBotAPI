@@ -93,6 +93,7 @@ def _make_request(token, method_name, method='get', params=None, files=None):
             # Long polling hangs for given time. Read timeout should be greater that long_polling_timeout
             read_timeout = max(params['timeout'] + 10, read_timeout)
 
+    params = params or None #set params to None if empty
 
     result = None
     if RETRY_ON_ERROR:
@@ -166,11 +167,6 @@ def _check_result(method_name, result):
 
 def get_me(token):
     method_url = r'getMe'
-    return _make_request(token, method_url)
-
-
-def get_my_commands(token):
-    method_url = r'getMyCommands'
     return _make_request(token, method_url)
 
 
@@ -334,8 +330,8 @@ def get_chat_administrators(token, chat_id):
     return _make_request(token, method_url, params=payload)
 
 
-def get_chat_members_count(token, chat_id):
-    method_url = r'getChatMembersCount'
+def get_chat_member_count(token, chat_id):
+    method_url = r'getChatMemberCount'
     payload = {'chat_id': chat_id}
     return _make_request(token, method_url, params=payload)
 
@@ -854,8 +850,8 @@ def get_method_by_type(data_type):
         return r'sendSticker'
 
 
-def kick_chat_member(token, chat_id, user_id, until_date=None, revoke_messages=None):
-    method_url = 'kickChatMember'
+def ban_chat_member(token, chat_id, user_id, until_date=None, revoke_messages=None):
+    method_url = 'banChatMember'
     payload = {'chat_id': chat_id, 'user_id': user_id}
     if isinstance(until_date, datetime):
         payload['until_date'] = until_date.timestamp()
@@ -1032,9 +1028,33 @@ def set_chat_title(token, chat_id, title):
     return _make_request(token, method_url, params=payload, method='post')
 
 
-def set_my_commands(token, commands):
+def get_my_commands(token, scope=None, language_code=None):
+    method_url = r'getMyCommands'
+    payload = {}
+    if scope:
+        payload['scope'] = scope.to_json()
+    if language_code:
+        payload['language_code'] = language_code
+    return _make_request(token, method_url, params=payload)
+
+
+def set_my_commands(token, commands, scope=None, language_code=None):
     method_url = r'setMyCommands'
     payload = {'commands': _convert_list_json_serializable(commands)}
+    if scope:
+        payload['scope'] = scope.to_json()
+    if language_code:
+        payload['language_code'] = language_code
+    return _make_request(token, method_url, params=payload, method='post')
+
+
+def delete_my_commands(token, scope=None, language_code=None):
+    method_url = r'deleteMyCommands'
+    payload = {}
+    if scope: 
+        payload['scope'] = scope.to_json()
+    if language_code: 
+        payload['language_code'] = language_code
     return _make_request(token, method_url, params=payload, method='post')
 
 
