@@ -740,7 +740,7 @@ class TeleBot:
 
     def stop_bot(self):
         self.stop_polling()
-        if self.worker_pool:
+        if self.threaded and self.worker_pool:
             self.worker_pool.close()
 
     def set_update_listener(self, listener):
@@ -2179,7 +2179,7 @@ class TeleBot:
                                              switch_pm_text, switch_pm_parameter)
 
     def answer_callback_query(
-            self, callback_query_id: str, 
+            self, callback_query_id: int, 
             text: Optional[str]=None, show_alert: Optional[bool]=None, 
             url: Optional[str]=None, cache_time: Optional[int]=None) -> bool:
         """
