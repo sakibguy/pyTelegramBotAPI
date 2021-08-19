@@ -973,11 +973,11 @@ def create_chat_invite_link(token, chat_id, expire_date, member_limit):
     }
 
     if expire_date is not None:
-        payload['expire_date'] = expire_date
         if isinstance(payload['expire_date'], datetime):
             payload['expire_date'] = payload['expire_date'].timestamp()
-
-    if member_limit is not None:
+        else:
+            payload['expire_date'] = expire_date
+    if member_limit:
         payload['member_limit'] = member_limit
 
     return _make_request(token, method_url, params=payload, method='post')
@@ -991,9 +991,10 @@ def edit_chat_invite_link(token, chat_id, invite_link, expire_date, member_limit
     }
 
     if expire_date is not None:
-        payload['expire_date'] = expire_date
         if isinstance(payload['expire_date'], datetime):
             payload['expire_date'] = payload['expire_date'].timestamp()
+        else:
+            payload['expire_date'] = expire_date
 
     if member_limit is not None:
         payload['member_limit'] = member_limit
@@ -1104,7 +1105,7 @@ def unpin_all_chat_messages(token, chat_id):
 # Updating messages
 
 def edit_message_text(token, text, chat_id=None, message_id=None, inline_message_id=None, parse_mode=None,
-                      disable_web_page_preview=None, reply_markup=None):
+                      entities = None, disable_web_page_preview=None, reply_markup=None):
     method_url = r'editMessageText'
     payload = {'text': text}
     if chat_id:
@@ -1115,6 +1116,8 @@ def edit_message_text(token, text, chat_id=None, message_id=None, inline_message
         payload['inline_message_id'] = inline_message_id
     if parse_mode:
         payload['parse_mode'] = parse_mode
+    if entities:
+        payload['entities'] = json.dumps(types.MessageEntity.to_list_of_dicts(entities))
     if disable_web_page_preview is not None:
         payload['disable_web_page_preview'] = disable_web_page_preview
     if reply_markup:
@@ -1256,7 +1259,7 @@ def get_game_high_scores(token, user_id, chat_id=None, message_id=None, inline_m
 
 def send_invoice(
         token, chat_id, title, description, invoice_payload, provider_token, currency, prices,
-        start_parameter, photo_url=None, photo_size=None, photo_width=None, photo_height=None,
+        start_parameter = None, photo_url=None, photo_size=None, photo_width=None, photo_height=None,
         need_name=None, need_phone_number=None, need_email=None, need_shipping_address=None,
         send_phone_number_to_provider = None, send_email_to_provider = None, is_flexible=None,
         disable_notification=None, reply_to_message_id=None, reply_markup=None, provider_data=None,
@@ -1296,8 +1299,10 @@ def send_invoice(
     """
     method_url = r'sendInvoice'
     payload = {'chat_id': chat_id, 'title': title, 'description': description, 'payload': invoice_payload,
-               'provider_token': provider_token, 'start_parameter': start_parameter, 'currency': currency,
+               'provider_token': provider_token, 'currency': currency,
                'prices': _convert_list_json_serializable(prices)}
+    if start_parameter:
+        payload['start_parameter'] = start_parameter
     if photo_url:
         payload['photo_url'] = photo_url
     if photo_size:
@@ -1483,7 +1488,7 @@ def send_poll(
         question, options,
         is_anonymous = None, type = None, allows_multiple_answers = None, correct_option_id = None,
         explanation = None, explanation_parse_mode=None, open_period = None, close_date = None, is_closed = None,
-        disable_notifications=False, reply_to_message_id=None, allow_sending_without_reply=None,
+        disable_notification=False, reply_to_message_id=None, allow_sending_without_reply=None,
         reply_markup=None, timeout=None, explanation_entities=None):
     method_url = r'sendPoll'
     payload = {
@@ -1513,8 +1518,8 @@ def send_poll(
     if is_closed is not None:
         payload['is_closed'] = is_closed
 
-    if disable_notifications:
-        payload['disable_notification'] = disable_notifications
+    if disable_notification:
+        payload['disable_notification'] = disable_notification
     if reply_to_message_id is not None:
         payload['reply_to_message_id'] = reply_to_message_id
     if allow_sending_without_reply is not None:
