@@ -185,6 +185,7 @@ class TeleBot:
         self.poll_answer_handlers = []
         self.my_chat_member_handlers = []
         self.chat_member_handlers = []
+        self.custom_filters = {}
 
         if apihelper.ENABLE_MIDDLEWARE:
             self.typed_middleware_handlers = {
@@ -2425,7 +2426,9 @@ class TeleBot:
         """
         return {
             'function': handler,
-            'filters': filters
+            'filters': {ftype: fvalue for ftype, fvalue in filters.items() if fvalue is not None}
+            # Remove None values, they are skipped in _test_filter anyway
+            #'filters': filters
         }
 
     def middleware_handler(self, update_types=None):
@@ -2476,7 +2479,7 @@ class TeleBot:
         else:
             self.default_middleware_handlers.append(handler)
 
-    def message_handler(self, commands=None, regexp=None, func=None, content_types=None, **kwargs):
+    def message_handler(self, commands=None, regexp=None, func=None, content_types=None, chat_types=None, **kwargs):
         """
         Message handler decorator.
         This decorator can be used to decorate functions that must handle certain types of messages.
@@ -2490,6 +2493,11 @@ class TeleBot:
         @bot.message_handler(regexp='someregexp')
         def command_help(message):
             bot.send_message(message.chat.id, 'Did someone call for help?')
+
+        # Handles messages in private chat
+        @bot.message_handler(chat_types=['private']) # You can add more chat types
+        def command_help(message):
+            bot.send_message(message.chat.id, 'Private chat detected, sir!')
 
         # Handle all sent documents of type 'text/plain'.
         @bot.message_handler(func=lambda message: message.document.mime_type == 'text/plain',
@@ -2508,13 +2516,23 @@ class TeleBot:
         :param func: Optional lambda function. The lambda receives the message to test as the first parameter.
             It must return True if the command should handle the message.
         :param content_types: Supported message content types. Must be a list. Defaults to ['text'].
+        :param chat_types: list of chat types
         """
 
         if content_types is None:
             content_types = ["text"]
 
+        if isinstance(commands, str):
+            logger.warning("message_handler: 'commands' filter should be List of strings (commands), not string.")
+            commands = [commands]
+
+        if isinstance(content_types, str):
+            logger.warning("message_handler: 'content_types' filter should be List of strings (content types), not string.")
+            content_types = [content_types]
+
         def decorator(handler):
             handler_dict = self._build_handler_dict(handler,
+                                                    chat_types=chat_types,
                                                     content_types=content_types,
                                                     commands=commands,
                                                     regexp=regexp,
@@ -2533,7 +2551,7 @@ class TeleBot:
         """
         self.message_handlers.append(handler_dict)
 
-    def register_message_handler(self, callback, content_types=None, commands=None, regexp=None, func=None, **kwargs):
+    def register_message_handler(self, callback, content_types=None, commands=None, regexp=None, func=None, chat_types=None, **kwargs):
         """
         Registers message handler.
         :param callback: function to be called
@@ -2541,22 +2559,34 @@ class TeleBot:
         :param commands: list of commands
         :param regexp:
         :param func:
+        :param chat_types: True for private chat
         :return: decorated function
         """
+        if isinstance(commands, str):
+            logger.warning("register_message_handler: 'commands' filter should be List of strings (commands), not string.")
+            commands = [commands]
+
+        if isinstance(content_types, str):
+            logger.warning("register_message_handler: 'content_types' filter should be List of strings (content types), not string.")
+            content_types = [content_types]
+
         handler_dict = self._build_handler_dict(callback,
+                                                chat_types=chat_types,
                                                 content_types=content_types,
                                                 commands=commands,
                                                 regexp=regexp,
                                                 func=func,
                                                 **kwargs)
         self.add_message_handler(handler_dict)
-    def edited_message_handler(self, commands=None, regexp=None, func=None, content_types=None, **kwargs):
+
+    def edited_message_handler(self, commands=None, regexp=None, func=None, content_types=None, chat_types=None, **kwargs):
         """
         Edit message handler decorator
         :param commands:
         :param regexp:
         :param func:
         :param content_types:
+        :param chat_types: list of chat types
         :param kwargs:
         :return:
         """
@@ -2564,12 +2594,21 @@ class TeleBot:
         if content_types is None:
             content_types = ["text"]
 
+        if isinstance(commands, str):
+            logger.warning("edited_message_handler: 'commands' filter should be List of strings (commands), not string.")
+            commands = [commands]
+
+        if isinstance(content_types, str):
+            logger.warning("edited_message_handler: 'content_types' filter should be List of strings (content types), not string.")
+            content_types = [content_types]
+
         def decorator(handler):
             handler_dict = self._build_handler_dict(handler,
+                                                    chat_types=chat_types,
+                                                    content_types=content_types,
                                                     commands=commands,
                                                     regexp=regexp,
                                                     func=func,
-                                                    content_types=content_types,
                                                     **kwargs)
             self.add_edited_message_handler(handler_dict)
             return handler
@@ -2584,7 +2623,7 @@ class TeleBot:
         """
         self.edited_message_handlers.append(handler_dict)
 
-    def register_edited_message_handler(self, callback, content_types=None, commands=None, regexp=None, func=None, **kwargs):
+    def register_edited_message_handler(self, callback, content_types=None, commands=None, regexp=None, func=None, chat_types=None, **kwargs):
         """
         Registers edited message handler.
         :param callback: function to be called
@@ -2592,15 +2631,26 @@ class TeleBot:
         :param commands: list of commands
         :param regexp:
         :param func:
+        :param chat_types: True for private chat
         :return: decorated function
         """
+        if isinstance(commands, str):
+            logger.warning("register_edited_message_handler: 'commands' filter should be List of strings (commands), not string.")
+            commands = [commands]
+
+        if isinstance(content_types, str):
+            logger.warning("register_edited_message_handler: 'content_types' filter should be List of strings (content types), not string.")
+            content_types = [content_types]
+
         handler_dict = self._build_handler_dict(callback,
+                                                chat_types=chat_types,
                                                 content_types=content_types,
                                                 commands=commands,
                                                 regexp=regexp,
                                                 func=func,
                                                 **kwargs)
         self.add_edited_message_handler(handler_dict)
+
     def channel_post_handler(self, commands=None, regexp=None, func=None, content_types=None, **kwargs):
         """
         Channel post handler decorator
@@ -2611,16 +2661,23 @@ class TeleBot:
         :param kwargs:
         :return:
         """
-
         if content_types is None:
             content_types = ["text"]
 
+        if isinstance(commands, str):
+            logger.warning("channel_post_handler: 'commands' filter should be List of strings (commands), not string.")
+            commands = [commands]
+
+        if isinstance(content_types, str):
+            logger.warning("channel_post_handler: 'content_types' filter should be List of strings (content types), not string.")
+            content_types = [content_types]
+
         def decorator(handler):
             handler_dict = self._build_handler_dict(handler,
+                                                    content_types=content_types,
                                                     commands=commands,
                                                     regexp=regexp,
                                                     func=func,
-                                                    content_types=content_types,
                                                     **kwargs)
             self.add_channel_post_handler(handler_dict)
             return handler
@@ -2645,6 +2702,14 @@ class TeleBot:
         :param func:
         :return: decorated function
         """
+        if isinstance(commands, str):
+            logger.warning("register_channel_post_handler: 'commands' filter should be List of strings (commands), not string.")
+            commands = [commands]
+
+        if isinstance(content_types, str):
+            logger.warning("register_channel_post_handler: 'content_types' filter should be List of strings (content types), not string.")
+            content_types = [content_types]
+
         handler_dict = self._build_handler_dict(callback,
                                                 content_types=content_types,
                                                 commands=commands,
@@ -2652,6 +2717,7 @@ class TeleBot:
                                                 func=func,
                                                 **kwargs)
         self.add_channel_post_handler(handler_dict)
+
     def edited_channel_post_handler(self, commands=None, regexp=None, func=None, content_types=None, **kwargs):
         """
         Edit channel post handler decorator
@@ -2662,16 +2728,23 @@ class TeleBot:
         :param kwargs:
         :return:
         """
-
         if content_types is None:
             content_types = ["text"]
 
+        if isinstance(commands, str):
+            logger.warning("edited_channel_post_handler: 'commands' filter should be List of strings (commands), not string.")
+            commands = [commands]
+
+        if isinstance(content_types, str):
+            logger.warning("edited_channel_post_handler: 'content_types' filter should be List of strings (content types), not string.")
+            content_types = [content_types]
+
         def decorator(handler):
             handler_dict = self._build_handler_dict(handler,
+                                                    content_types=content_types,
                                                     commands=commands,
                                                     regexp=regexp,
                                                     func=func,
-                                                    content_types=content_types,
                                                     **kwargs)
             self.add_edited_channel_post_handler(handler_dict)
             return handler
@@ -2696,6 +2769,14 @@ class TeleBot:
         :param func:
         :return: decorated function
         """
+        if isinstance(commands, str):
+            logger.warning("register_edited_channel_post_handler: 'commands' filter should be List of strings (commands), not string.")
+            commands = [commands]
+
+        if isinstance(content_types, str):
+            logger.warning("register_edited_channel_post_handler: 'content_types' filter should be List of strings (content types), not string.")
+            content_types = [content_types]
+
         handler_dict = self._build_handler_dict(callback,
                                                 content_types=content_types,
                                                 commands=commands,
@@ -2769,7 +2850,6 @@ class TeleBot:
         """
         handler_dict = self._build_handler_dict(callback, func=func, **kwargs)
         self.add_chosen_inline_handler(handler_dict)
-
 
     def callback_query_handler(self, func, **kwargs):
         """
@@ -2900,9 +2980,7 @@ class TeleBot:
         :param func:
         :return: decorated function
         """
-        handler_dict = self._build_handler_dict(callback,
-                                                    func=func,
-                                                    **kwargs)
+        handler_dict = self._build_handler_dict(callback, func=func, **kwargs)
         self.add_poll_handler(handler_dict)
 
     def poll_answer_handler(self, func=None, **kwargs):
@@ -2935,9 +3013,7 @@ class TeleBot:
         :param func:
         :return: decorated function
         """
-        handler_dict = self._build_handler_dict(callback,
-                                                    func=func,
-                                                    **kwargs)
+        handler_dict = self._build_handler_dict(callback, func=func, **kwargs)
         self.add_poll_answer_handler(handler_dict)
 
     def my_chat_member_handler(self, func=None, **kwargs):
@@ -2970,9 +3046,7 @@ class TeleBot:
         :param func:
         :return: decorated function
         """
-        handler_dict = self._build_handler_dict(callback,
-                                                    func=func,
-                                                    **kwargs)
+        handler_dict = self._build_handler_dict(callback, func=func, **kwargs)
         self.add_my_chat_member_handler(handler_dict)
 
     def chat_member_handler(self, func=None, **kwargs):
@@ -3024,8 +3098,14 @@ class TeleBot:
 
         return True
 
-    @staticmethod
-    def _test_filter(message_filter, filter_value, message):
+    def add_custom_filter(self, custom_filter):
+        """
+        Create custom filter.
+        custom_filter: Class with check(message) method.
+        """
+        self.custom_filters[custom_filter.key] = custom_filter
+
+    def _test_filter(self, message_filter, filter_value, message):
         """
         Test filters
         :param message_filter: Filter type passed in handler
@@ -3040,15 +3120,32 @@ class TeleBot:
         #         'func': lambda msg: filter_value(msg)
         #     }
         #     return test_cases.get(message_filter, lambda msg: False)(message)
+        
         if message_filter == 'content_types':
             return message.content_type in filter_value
         elif message_filter == 'regexp':
             return message.content_type == 'text' and re.search(filter_value, message.text, re.IGNORECASE)
         elif message_filter == 'commands':
             return message.content_type == 'text' and util.extract_command(message.text) in filter_value
+        elif message_filter == 'chat_types':
+            return message.chat.type in filter_value
         elif message_filter == 'func':
             return filter_value(message)
+        elif self.custom_filters and message_filter in self.custom_filters:
+            return self._check_filter(message_filter,filter_value,message)
         else:
+            return False
+
+    def _check_filter(self, message_filter, filter_value, message):
+        filter_check = self.custom_filters.get(message_filter)
+        if not filter_check:
+            return False
+        elif isinstance(filter_check, util.SimpleCustomFilter):
+            return filter_value == filter_check.check(message)
+        elif isinstance(filter_check, util.AdvancedCustomFilter):
+            return filter_check.check(message, filter_value)
+        else:
+            logger.error("Custom filter: wrong type. Should be SimpleCustomFilter or AdvancedCustomFilter.")
             return False
 
     def _notify_command_handlers(self, handlers, new_messages):
